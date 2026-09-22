@@ -251,7 +251,7 @@ public class CustomerDaoImpl implements CustomerDao {
                 resultSet.getTimestamp("kyc_verified_at");
 
         if (verifiedAt != null) {
-            customer.setKycVerifiedAt(verifiedAt.toLocalDateTime().toString());
+            customer.setKycVerifiedAt(verifiedAt.toString());
         }
 
         customer.setCreditScore(resultSet.getInt("credit_score"));

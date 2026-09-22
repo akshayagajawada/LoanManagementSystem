@@ -14,7 +14,6 @@ import com.loanmanagement.model.LoanType;
 
 import com.loanmanagement.service.ApplicationService;
 import com.loanmanagement.service.CreditBureauService;
-import com.loanmanagement.service.impl.CreditBureauServiceImpl;
 
 public class ApplicationServiceImpl implements ApplicationService {
 
@@ -47,10 +46,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // --------------------------------------------------------
-        // 1. Validate customer
-        // --------------------------------------------------------
-
         if (application.getCustomerId() <= 0) {
             throw new IllegalArgumentException(
                     "Invalid customer ID"
@@ -68,10 +63,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // --------------------------------------------------------
-        // 2. Customer must have VERIFIED KYC
-        // --------------------------------------------------------
-
         if (!"VERIFIED".equalsIgnoreCase(
                 customer.getKycStatus()
         )) {
@@ -80,10 +71,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                     "KYC must be VERIFIED before applying for a loan"
             );
         }
-
-        // --------------------------------------------------------
-        // 3. Validate loan type
-        // --------------------------------------------------------
 
         if (application.getLoanTypeId() <= 0) {
             throw new IllegalArgumentException(
@@ -102,10 +89,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // --------------------------------------------------------
-        // 4. Loan type must be ACTIVE
-        // --------------------------------------------------------
-
         if (!"ACTIVE".equalsIgnoreCase(
                 loanType.getStatus()
         )) {
@@ -114,10 +97,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                     "Selected loan type is inactive"
             );
         }
-
-        // --------------------------------------------------------
-        // 5. Validate requested amount
-        // --------------------------------------------------------
 
         if (application.getRequestedAmount() <= 0) {
             throw new IllegalArgumentException(
@@ -141,10 +120,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // --------------------------------------------------------
-        // 6. Validate tenure
-        // --------------------------------------------------------
-
         if (application.getTenureMonths() <= 0) {
             throw new IllegalArgumentException(
                     "Tenure must be greater than zero"
@@ -159,10 +134,6 @@ public class ApplicationServiceImpl implements ApplicationService {
             );
         }
 
-        // --------------------------------------------------------
-        // 7. Validate purpose
-        // --------------------------------------------------------
-
         if (application.getPurpose() == null ||
                 application.getPurpose().isBlank()) {
 
@@ -170,10 +141,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                     "Loan purpose cannot be empty"
             );
         }
-
-        // --------------------------------------------------------
-        // 8. Credit assessment
-        // --------------------------------------------------------
 
         int creditScore =
                 creditBureauService.getCreditScore(
@@ -187,15 +154,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                         + creditScore
         );
 
-        // --------------------------------------------------------
-        // 9. New applications always start as PENDING
-        // --------------------------------------------------------
-
         application.setStatus("PENDING");
-
-        // --------------------------------------------------------
-        // 10. Save application
-        // --------------------------------------------------------
 
         loanApplicationDao.addLoanApplication(
                 application
@@ -275,6 +234,116 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         loanApplicationDao.deleteLoanApplication(
                 applicationId
+        );
+    }
+
+    // =========================================================
+    // APPROVE APPLICATION
+    // =========================================================
+
+    @Override
+    public void approveApplication(
+            int applicationId,
+            int officerId,
+            String remarks) {
+
+        if (applicationId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid application ID"
+            );
+        }
+
+        if (officerId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid officer ID"
+            );
+        }
+
+        LoanApplication application =
+                getApplicationById(applicationId);
+
+        if (!"PENDING".equalsIgnoreCase(
+                application.getStatus()
+        )) {
+
+            throw new IllegalArgumentException(
+                    "Only PENDING applications can be approved"
+            );
+        }
+
+        application.setStatus("APPROVED");
+        application.setReviewedBy(officerId);
+        application.setRemarks(remarks);
+        application.setReviewedAt(
+                new java.sql.Timestamp(
+                        System.currentTimeMillis()
+                ).toString()
+        );
+
+        loanApplicationDao.updateLoanApplication(
+                application
+        );
+
+        System.out.println(
+                "Loan application approved successfully."
+        );
+    }
+
+    // =========================================================
+    // REJECT APPLICATION
+    // =========================================================
+
+    @Override
+    public void rejectApplication(
+            int applicationId,
+            int officerId,
+            String remarks) {
+
+        if (applicationId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid application ID"
+            );
+        }
+
+        if (officerId <= 0) {
+            throw new IllegalArgumentException(
+                    "Invalid officer ID"
+            );
+        }
+
+        if (remarks == null || remarks.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Remarks are required when rejecting an application"
+            );
+        }
+
+        LoanApplication application =
+                getApplicationById(applicationId);
+
+        if (!"PENDING".equalsIgnoreCase(
+                application.getStatus()
+        )) {
+
+            throw new IllegalArgumentException(
+                    "Only PENDING applications can be rejected"
+            );
+        }
+
+        application.setStatus("REJECTED");
+        application.setReviewedBy(officerId);
+        application.setRemarks(remarks);
+        application.setReviewedAt(
+                new java.sql.Timestamp(
+                        System.currentTimeMillis()
+                ).toString()
+        );
+
+        loanApplicationDao.updateLoanApplication(
+                application
+        );
+
+        System.out.println(
+                "Loan application rejected successfully."
         );
     }
 }

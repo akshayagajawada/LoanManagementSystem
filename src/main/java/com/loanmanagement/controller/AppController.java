@@ -150,6 +150,34 @@ public class AppController {
         applicationService.deleteApplication(applicationId);
     }
 
+    // Approve loan application
+
+    public void approveApplication(
+            int applicationId,
+            int officerId,
+            String remarks) {
+
+        applicationService.approveApplication(
+                applicationId,
+                officerId,
+                remarks
+        );
+    }
+
+    // Reject loan application
+
+    public void rejectApplication(
+            int applicationId,
+            int officerId,
+            String remarks) {
+
+        applicationService.rejectApplication(
+                applicationId,
+                officerId,
+                remarks
+        );
+    }
+
     // =========================
     // LOAN
     // =========================

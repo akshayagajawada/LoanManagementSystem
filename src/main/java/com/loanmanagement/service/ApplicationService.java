@@ -11,4 +11,8 @@ public interface ApplicationService {
     void updateApplication(LoanApplication application);
 
     void deleteApplication(int applicationId);
+
+    void approveApplication(int applicationId, int officerId, String remarks);
+
+    void rejectApplication(int applicationId, int officerId, String remarks);
 }

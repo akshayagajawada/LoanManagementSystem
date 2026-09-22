@@ -3,6 +3,7 @@ package com.loanmanagement.dao;
 import com.loanmanagement.model.LoanApplication;
 
 public interface LoanApplicationDao {
+
     void addLoanApplication(LoanApplication application);
 
     LoanApplication getLoanApplicationById(int applicationId);

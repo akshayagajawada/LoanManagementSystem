@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 public class LoanTypeDaoImpl implements LoanTypeDao {
 
@@ -22,7 +23,11 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
                 """;
 
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(
+                             sql,
+                             Statement.RETURN_GENERATED_KEYS
+                     )) {
 
             statement.setString(1, loanType.getName());
             statement.setString(2, loanType.getDescription());
@@ -30,15 +35,29 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
             statement.setDouble(4, loanType.getMinAmount());
             statement.setDouble(5, loanType.getMaxAmount());
             statement.setInt(6, loanType.getMaxTenureMonths());
-            statement.setString(7,
+            statement.setString(
+                    7,
                     loanType.getStatus() == null
                             ? "ACTIVE"
-                            : loanType.getStatus());
+                            : loanType.getStatus()
+            );
 
             statement.executeUpdate();
 
+            try (ResultSet resultSet =
+                         statement.getGeneratedKeys()) {
+
+                if (resultSet.next()) {
+                    loanType.setLoanTypeId(
+                            resultSet.getInt(1)
+                    );
+                }
+            }
+
         } catch (SQLException e) {
-            throw new RuntimeException("Error while adding loan type", e);
+            throw new RuntimeException(
+                    "Error while adding loan type", e
+            );
         }
     }
 
@@ -53,11 +72,13 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
                 """;
 
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             statement.setInt(1, loanTypeId);
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 if (resultSet.next()) {
                     return mapLoanType(resultSet);
@@ -67,7 +88,9 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error while fetching loan type", e);
+            throw new RuntimeException(
+                    "Error while fetching loan type", e
+            );
         }
     }
 
@@ -87,7 +110,8 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
                 """;
 
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             statement.setString(1, loanType.getName());
             statement.setString(2, loanType.getDescription());
@@ -101,40 +125,69 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error while updating loan type", e);
+            throw new RuntimeException(
+                    "Error while updating loan type", e
+            );
         }
     }
 
     @Override
     public void deleteLoanType(int loanTypeId) {
 
-        String sql = "DELETE FROM loan_types WHERE loan_type_id = ?";
+        String sql =
+                "DELETE FROM loan_types WHERE loan_type_id = ?";
 
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(sql)) {
 
             statement.setInt(1, loanTypeId);
+
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error while deleting loan type", e);
+            throw new RuntimeException(
+                    "Error while deleting loan type", e
+            );
         }
     }
 
-    private LoanType mapLoanType(ResultSet resultSet) throws SQLException {
+    private LoanType mapLoanType(
+            ResultSet resultSet) throws SQLException {
 
         LoanType loanType = new LoanType();
 
-        loanType.setLoanTypeId(resultSet.getInt("loan_type_id"));
-        loanType.setName(resultSet.getString("name"));
-        loanType.setDescription(resultSet.getString("description"));
-        loanType.setInterestRate(resultSet.getDouble("interest_rate"));
-        loanType.setMinAmount(resultSet.getDouble("min_amount"));
-        loanType.setMaxAmount(resultSet.getDouble("max_amount"));
+        loanType.setLoanTypeId(
+                resultSet.getInt("loan_type_id")
+        );
+
+        loanType.setName(
+                resultSet.getString("name")
+        );
+
+        loanType.setDescription(
+                resultSet.getString("description")
+        );
+
+        loanType.setInterestRate(
+                resultSet.getDouble("interest_rate")
+        );
+
+        loanType.setMinAmount(
+                resultSet.getDouble("min_amount")
+        );
+
+        loanType.setMaxAmount(
+                resultSet.getDouble("max_amount")
+        );
+
         loanType.setMaxTenureMonths(
                 resultSet.getInt("max_tenure_months")
         );
-        loanType.setStatus(resultSet.getString("status"));
+
+        loanType.setStatus(
+                resultSet.getString("status")
+        );
 
         return loanType;
     }
