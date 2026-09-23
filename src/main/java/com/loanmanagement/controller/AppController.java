@@ -66,8 +66,9 @@ public class AppController {
         authService.logout(userId);
     }
 
+
     // =========================
-    // USER
+    // USER CRUD
     // =========================
 
     public void addUser(User user) {
@@ -90,8 +91,9 @@ public class AppController {
         userService.deleteUser(userId);
     }
 
+
     // =========================
-    // CUSTOMER
+    // CUSTOMER CRUD
     // =========================
 
     public void addCustomer(Customer customer) {
@@ -110,8 +112,9 @@ public class AppController {
         customerService.deleteCustomer(customerId);
     }
 
+
     // =========================
-    // LOAN TYPE
+    // LOAN TYPE CRUD
     // =========================
 
     public void addLoanType(LoanType loanType) {
@@ -129,6 +132,7 @@ public class AppController {
     public void deleteLoanType(int loanTypeId) {
         loanTypeService.deleteLoanType(loanTypeId);
     }
+
 
     // =========================
     // LOAN APPLICATION
@@ -150,7 +154,10 @@ public class AppController {
         applicationService.deleteApplication(applicationId);
     }
 
-    // Approve loan application
+
+    // =========================
+    // APPLICATION APPROVAL
+    // =========================
 
     public void approveApplication(
             int applicationId,
@@ -164,7 +171,10 @@ public class AppController {
         );
     }
 
-    // Reject loan application
+
+    // =========================
+    // APPLICATION REJECTION
+    // =========================
 
     public void rejectApplication(
             int applicationId,
@@ -178,8 +188,9 @@ public class AppController {
         );
     }
 
+
     // =========================
-    // LOAN
+    // LOAN CRUD
     // =========================
 
     public void addLoan(Loan loan) {
@@ -198,8 +209,24 @@ public class AppController {
         loanService.deleteLoan(loanId);
     }
 
+
     // =========================
-    // REPAYMENT
+    // CREATE LOAN FROM APPROVED APPLICATION
+    // =========================
+
+    public Loan createLoanFromApplication(
+            int applicationId,
+            int createdBy) {
+
+        return loanService.createLoanFromApplication(
+                applicationId,
+                createdBy
+        );
+    }
+
+
+    // =========================
+    // REPAYMENT CRUD
     // =========================
 
     public void addRepayment(Repayment repayment) {
@@ -217,6 +244,7 @@ public class AppController {
     public void deleteRepayment(int repaymentId) {
         repaymentService.deleteRepayment(repaymentId);
     }
+
 
     // =========================
     // DASHBOARD
