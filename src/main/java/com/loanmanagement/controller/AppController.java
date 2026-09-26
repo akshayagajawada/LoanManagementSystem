@@ -4,25 +4,20 @@ import com.loanmanagement.model.Customer;
 import com.loanmanagement.model.Loan;
 import com.loanmanagement.model.LoanApplication;
 import com.loanmanagement.model.LoanType;
-import com.loanmanagement.model.Repayment;
 import com.loanmanagement.model.User;
 
 import com.loanmanagement.service.ApplicationService;
 import com.loanmanagement.service.AuthService;
 import com.loanmanagement.service.CustomerService;
-import com.loanmanagement.service.DashBoardService;
 import com.loanmanagement.service.LoanService;
 import com.loanmanagement.service.LoanTypeService;
-import com.loanmanagement.service.RepaymentService;
 import com.loanmanagement.service.UserService;
 
 import com.loanmanagement.service.impl.ApplicationServiceImpl;
 import com.loanmanagement.service.impl.AuthServiceImpl;
 import com.loanmanagement.service.impl.CustomerServiceImpl;
-import com.loanmanagement.service.impl.DashBoardServiceImpl;
 import com.loanmanagement.service.impl.LoanServiceImpl;
 import com.loanmanagement.service.impl.LoanTypeServiceImpl;
-import com.loanmanagement.service.impl.RepaymentServiceImpl;
 import com.loanmanagement.service.impl.UserServiceImpl;
 
 import java.util.List;
@@ -35,8 +30,6 @@ public class AppController {
     private final LoanTypeService loanTypeService;
     private final ApplicationService applicationService;
     private final LoanService loanService;
-    private final RepaymentService repaymentService;
-    private final DashBoardService dashBoardService;
 
     public AppController() {
 
@@ -46,8 +39,6 @@ public class AppController {
         this.loanTypeService = new LoanTypeServiceImpl();
         this.applicationService = new ApplicationServiceImpl();
         this.loanService = new LoanServiceImpl();
-        this.repaymentService = new RepaymentServiceImpl();
-        this.dashBoardService = new DashBoardServiceImpl();
     }
 
     // =========================
@@ -222,47 +213,5 @@ public class AppController {
                 applicationId,
                 createdBy
         );
-    }
-
-
-    // =========================
-    // REPAYMENT CRUD
-    // =========================
-
-    public void addRepayment(Repayment repayment) {
-        repaymentService.addRepayment(repayment);
-    }
-
-    public Repayment getRepaymentById(int repaymentId) {
-        return repaymentService.getRepaymentById(repaymentId);
-    }
-
-    public void updateRepayment(Repayment repayment) {
-        repaymentService.updateRepayment(repayment);
-    }
-
-    public void deleteRepayment(int repaymentId) {
-        repaymentService.deleteRepayment(repaymentId);
-    }
-
-
-    // =========================
-    // DASHBOARD
-    // =========================
-
-    public int getTotalCustomers() {
-        return dashBoardService.getTotalCustomers();
-    }
-
-    public int getTotalLoans() {
-        return dashBoardService.getTotalLoans();
-    }
-
-    public double getTotalLoanAmount() {
-        return dashBoardService.getTotalLoanAmount();
-    }
-
-    public double getTotalRepaymentAmount() {
-        return dashBoardService.getTotalRepaymentAmount();
     }
 }

@@ -8,18 +8,47 @@ import java.sql.*;
 
 public class LoanApplicationDaoImpl implements LoanApplicationDao {
 
+    private static final String SQL_INSERT_APPLICATION = """
+            INSERT INTO loan_applications
+            (customer_id, loan_type_id, requested_amount, tenure_months,
+             purpose, status, remarks, reviewed_by)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+    private static final String SQL_SELECT_APPLICATION_BY_ID = """
+            SELECT application_id, customer_id, loan_type_id,
+                   requested_amount, tenure_months, purpose,
+                   status, remarks, reviewed_by, applied_at, reviewed_at
+            FROM loan_applications
+            WHERE application_id = ?
+            """;
+
+    private static final String SQL_UPDATE_APPLICATION = """
+            UPDATE loan_applications
+            SET customer_id = ?,
+                loan_type_id = ?,
+                requested_amount = ?,
+                tenure_months = ?,
+                purpose = ?,
+                status = ?,
+                remarks = ?,
+                reviewed_by = ?,
+                applied_at = ?,
+                reviewed_at = ?
+            WHERE application_id = ?
+            """;
+
+    private static final String SQL_DELETE_APPLICATION = """
+            DELETE FROM loan_applications
+            WHERE application_id = ?
+            """;
+
     @Override
     public void addLoanApplication(LoanApplication application) {
 
-        String sql = """
-                INSERT INTO loan_applications
-                (customer_id, loan_type_id, requested_amount, tenure_months,
-                 purpose, status, remarks, reviewed_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_INSERT_APPLICATION)) {
 
             statement.setInt(1, application.getCustomerId());
             statement.setInt(2, application.getLoanTypeId());
@@ -50,16 +79,9 @@ public class LoanApplicationDaoImpl implements LoanApplicationDao {
     @Override
     public LoanApplication getLoanApplicationById(int applicationId) {
 
-        String sql = """
-                SELECT application_id, customer_id, loan_type_id,
-                       requested_amount, tenure_months, purpose,
-                       status, remarks, reviewed_by, applied_at, reviewed_at
-                FROM loan_applications
-                WHERE application_id = ?
-                """;
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_SELECT_APPLICATION_BY_ID)) {
 
             statement.setInt(1, applicationId);
 
@@ -82,23 +104,9 @@ public class LoanApplicationDaoImpl implements LoanApplicationDao {
     @Override
     public void updateLoanApplication(LoanApplication application) {
 
-        String sql = """
-                UPDATE loan_applications
-                SET customer_id = ?,
-                    loan_type_id = ?,
-                    requested_amount = ?,
-                    tenure_months = ?,
-                    purpose = ?,
-                    status = ?,
-                    remarks = ?,
-                    reviewed_by = ?,
-                    applied_at = ?,
-                    reviewed_at = ?
-                WHERE application_id = ?
-                """;
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_UPDATE_APPLICATION)) {
 
             statement.setInt(1, application.getCustomerId());
             statement.setInt(2, application.getLoanTypeId());
@@ -160,13 +168,9 @@ public class LoanApplicationDaoImpl implements LoanApplicationDao {
     @Override
     public void deleteLoanApplication(int applicationId) {
 
-        String sql = """
-                DELETE FROM loan_applications
-                WHERE application_id = ?
-                """;
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_DELETE_APPLICATION)) {
 
             statement.setInt(1, applicationId);
 

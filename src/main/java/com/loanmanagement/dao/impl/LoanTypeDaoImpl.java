@@ -12,20 +12,42 @@ import java.sql.Statement;
 
 public class LoanTypeDaoImpl implements LoanTypeDao {
 
+    private static final String SQL_INSERT_LOAN_TYPE = """
+            INSERT INTO loan_types
+            (name, description, interest_rate, min_amount,
+             max_amount, max_tenure_months, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """;
+
+    private static final String SQL_SELECT_LOAN_TYPE_BY_ID = """
+            SELECT loan_type_id, name, description, interest_rate,
+                   min_amount, max_amount, max_tenure_months, status
+            FROM loan_types
+            WHERE loan_type_id = ?
+            """;
+
+    private static final String SQL_UPDATE_LOAN_TYPE = """
+            UPDATE loan_types
+            SET name = ?,
+                description = ?,
+                interest_rate = ?,
+                min_amount = ?,
+                max_amount = ?,
+                max_tenure_months = ?,
+                status = ?
+            WHERE loan_type_id = ?
+            """;
+
+    private static final String SQL_DELETE_LOAN_TYPE =
+            "DELETE FROM loan_types WHERE loan_type_id = ?";
+
     @Override
     public void addLoanType(LoanType loanType) {
-
-        String sql = """
-                INSERT INTO loan_types
-                (name, description, interest_rate, min_amount,
-                 max_amount, max_tenure_months, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """;
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
                      connection.prepareStatement(
-                             sql,
+                             SQL_INSERT_LOAN_TYPE,
                              Statement.RETURN_GENERATED_KEYS
                      )) {
 
@@ -64,16 +86,10 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
     @Override
     public LoanType getLoanTypeById(int loanTypeId) {
 
-        String sql = """
-                SELECT loan_type_id, name, description, interest_rate,
-                       min_amount, max_amount, max_tenure_months, status
-                FROM loan_types
-                WHERE loan_type_id = ?
-                """;
-
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+                     connection.prepareStatement(
+                             SQL_SELECT_LOAN_TYPE_BY_ID)) {
 
             statement.setInt(1, loanTypeId);
 
@@ -97,21 +113,10 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
     @Override
     public void updateLoanType(LoanType loanType) {
 
-        String sql = """
-                UPDATE loan_types
-                SET name = ?,
-                    description = ?,
-                    interest_rate = ?,
-                    min_amount = ?,
-                    max_amount = ?,
-                    max_tenure_months = ?,
-                    status = ?
-                WHERE loan_type_id = ?
-                """;
-
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+                     connection.prepareStatement(
+                             SQL_UPDATE_LOAN_TYPE)) {
 
             statement.setString(1, loanType.getName());
             statement.setString(2, loanType.getDescription());
@@ -134,12 +139,10 @@ public class LoanTypeDaoImpl implements LoanTypeDao {
     @Override
     public void deleteLoanType(int loanTypeId) {
 
-        String sql =
-                "DELETE FROM loan_types WHERE loan_type_id = ?";
-
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(sql)) {
+                     connection.prepareStatement(
+                             SQL_DELETE_LOAN_TYPE)) {
 
             statement.setInt(1, loanTypeId);
 

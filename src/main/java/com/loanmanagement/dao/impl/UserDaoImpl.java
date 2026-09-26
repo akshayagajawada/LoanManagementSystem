@@ -12,21 +12,42 @@ import java.util.List;
 
 public class UserDaoImpl implements UserDao {
 
+    private static final String SQL_INSERT_USER = """
+            INSERT INTO users
+            (username, password_hash, role, status)
+            VALUES (?, ?, ?, ?)
+            """;
+
+    private static final String SQL_SELECT_USER_BY_ID =
+            "SELECT * FROM users WHERE user_id = ?";
+
+    private static final String SQL_SELECT_USER_BY_USERNAME =
+            "SELECT * FROM users WHERE username = ?";
+
+    private static final String SQL_SELECT_ALL_USERS =
+            "SELECT * FROM users ORDER BY user_id";
+
+    private static final String SQL_UPDATE_USER = """
+            UPDATE users
+            SET username = ?,
+                password_hash = ?,
+                role = ?,
+                status = ?
+            WHERE user_id = ?
+            """;
+
+    private static final String SQL_DELETE_USER =
+            "DELETE FROM users WHERE user_id = ?";
+
     @Override
     public void addUser(User user) {
-
-        String sql = """
-                INSERT INTO users
-                (username, password_hash, role, status)
-                VALUES (?, ?, ?, ?)
-                """;
 
         try (
                 Connection connection =
                         DBConnection.getConnection();
 
                 PreparedStatement statement =
-                        connection.prepareStatement(sql)
+                        connection.prepareStatement(SQL_INSERT_USER)
         ) {
 
             statement.setString(
@@ -63,15 +84,14 @@ public class UserDaoImpl implements UserDao {
     @Override
     public User getUserById(int userId) {
 
-        String sql =
-                "SELECT * FROM users WHERE user_id = ?";
-
         try (
                 Connection connection =
                         DBConnection.getConnection();
 
                 PreparedStatement statement =
-                        connection.prepareStatement(sql)
+                        connection.prepareStatement(
+                                SQL_SELECT_USER_BY_ID
+                        )
         ) {
 
             statement.setInt(1, userId);
@@ -98,18 +118,16 @@ public class UserDaoImpl implements UserDao {
     }
 
     @Override
-    public User getUserByUsername(
-            String username) {
-
-        String sql =
-                "SELECT * FROM users WHERE username = ?";
+    public User getUserByUsername(String username) {
 
         try (
                 Connection connection =
                         DBConnection.getConnection();
 
                 PreparedStatement statement =
-                        connection.prepareStatement(sql)
+                        connection.prepareStatement(
+                                SQL_SELECT_USER_BY_USERNAME
+                        )
         ) {
 
             statement.setString(
@@ -141,9 +159,6 @@ public class UserDaoImpl implements UserDao {
     @Override
     public List<User> getAllUsers() {
 
-        String sql =
-                "SELECT * FROM users ORDER BY user_id";
-
         List<User> users =
                 new ArrayList<>();
 
@@ -152,7 +167,9 @@ public class UserDaoImpl implements UserDao {
                         DBConnection.getConnection();
 
                 PreparedStatement statement =
-                        connection.prepareStatement(sql);
+                        connection.prepareStatement(
+                                SQL_SELECT_ALL_USERS
+                        );
 
                 ResultSet resultSet =
                         statement.executeQuery()
@@ -179,21 +196,14 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void updateUser(User user) {
 
-        String sql = """
-                UPDATE users
-                SET username = ?,
-                    password_hash = ?,
-                    role = ?,
-                    status = ?
-                WHERE user_id = ?
-                """;
-
         try (
                 Connection connection =
                         DBConnection.getConnection();
 
                 PreparedStatement statement =
-                        connection.prepareStatement(sql)
+                        connection.prepareStatement(
+                                SQL_UPDATE_USER
+                        )
         ) {
 
             statement.setString(
@@ -235,15 +245,14 @@ public class UserDaoImpl implements UserDao {
     @Override
     public void deleteUser(int userId) {
 
-        String sql =
-                "DELETE FROM users WHERE user_id = ?";
-
         try (
                 Connection connection =
                         DBConnection.getConnection();
 
                 PreparedStatement statement =
-                        connection.prepareStatement(sql)
+                        connection.prepareStatement(
+                                SQL_DELETE_USER
+                        )
         ) {
 
             statement.setInt(1, userId);
@@ -263,8 +272,7 @@ public class UserDaoImpl implements UserDao {
     // MAP RESULT TO USER
     // =========================
 
-    private User mapUser(
-            ResultSet resultSet)
+    private User mapUser(ResultSet resultSet)
             throws Exception {
 
         User user = new User();

@@ -11,20 +11,59 @@ import java.sql.SQLException;
 
 public class CustomerDaoImpl implements CustomerDao {
 
+    private static final String SQL_INSERT_CUSTOMER = """
+            INSERT INTO customers
+            (user_id, full_name, email, phone, dob, address, monthly_income,
+             pan_number, aadhaar_last4, employment_type, kyc_status,
+             kyc_remarks, kyc_verified_by, kyc_verified_at,
+             credit_score, existing_emi, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """;
+
+    private static final String SQL_SELECT_CUSTOMER_BY_ID = """
+            SELECT customer_id, user_id, full_name, email, phone, dob,
+                   address, monthly_income, pan_number, aadhaar_last4,
+                   employment_type, account_number, ifsc_code, bank_name,
+                   kyc_status, kyc_remarks, kyc_verified_by,
+                   kyc_verified_at, credit_score, existing_emi, status
+            FROM customers
+            WHERE customer_id = ?
+            """;
+
+    private static final String SQL_UPDATE_CUSTOMER = """
+            UPDATE customers
+            SET user_id = ?,
+                full_name = ?,
+                email = ?,
+                phone = ?,
+                dob = ?,
+                address = ?,
+                monthly_income = ?,
+                pan_number = ?,
+                aadhaar_last4 = ?,
+                employment_type = ?,
+                account_number = ?,
+                ifsc_code = ?,
+                bank_name = ?,
+                kyc_status = ?,
+                kyc_remarks = ?,
+                kyc_verified_by = ?,
+                kyc_verified_at = ?,
+                credit_score = ?,
+                existing_emi = ?,
+                status = ?
+            WHERE customer_id = ?
+            """;
+
+    private static final String SQL_DELETE_CUSTOMER =
+            "DELETE FROM customers WHERE customer_id = ?";
+
     @Override
     public void addCustomer(Customer customer) {
 
-        String sql = """
-                INSERT INTO customers
-                (user_id, full_name, email, phone, dob, address, monthly_income,
-                 pan_number, aadhaar_last4, employment_type, kyc_status,
-                 kyc_remarks, kyc_verified_by, kyc_verified_at,
-                 credit_score, existing_emi, status)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """;
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_INSERT_CUSTOMER)) {
 
             statement.setInt(1, customer.getUserId());
             statement.setString(2, customer.getFullName());
@@ -89,18 +128,9 @@ public class CustomerDaoImpl implements CustomerDao {
     @Override
     public Customer getCustomerById(int customerId) {
 
-        String sql = """
-                SELECT customer_id, user_id, full_name, email, phone, dob,
-                       address, monthly_income, pan_number, aadhaar_last4,
-                       employment_type, account_number, ifsc_code, bank_name,
-                       kyc_status, kyc_remarks, kyc_verified_by,
-                       kyc_verified_at, credit_score, existing_emi, status
-                FROM customers
-                WHERE customer_id = ?
-                """;
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_SELECT_CUSTOMER_BY_ID)) {
 
             statement.setInt(1, customerId);
 
@@ -121,33 +151,9 @@ public class CustomerDaoImpl implements CustomerDao {
     @Override
     public void updateCustomer(Customer customer) {
 
-        String sql = """
-                UPDATE customers
-                SET user_id = ?,
-                    full_name = ?,
-                    email = ?,
-                    phone = ?,
-                    dob = ?,
-                    address = ?,
-                    monthly_income = ?,
-                    pan_number = ?,
-                    aadhaar_last4 = ?,
-                    employment_type = ?,
-                    account_number = ?,
-                    ifsc_code = ?,
-                    bank_name = ?,
-                    kyc_status = ?,
-                    kyc_remarks = ?,
-                    kyc_verified_by = ?,
-                    kyc_verified_at = ?,
-                    credit_score = ?,
-                    existing_emi = ?,
-                    status = ?
-                WHERE customer_id = ?
-                """;
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_UPDATE_CUSTOMER)) {
 
             statement.setInt(1, customer.getUserId());
             statement.setString(2, customer.getFullName());
@@ -207,10 +213,9 @@ public class CustomerDaoImpl implements CustomerDao {
     @Override
     public void deleteCustomer(int customerId) {
 
-        String sql = "DELETE FROM customers WHERE customer_id = ?";
-
         try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(sql)) {
+             PreparedStatement statement =
+                     connection.prepareStatement(SQL_DELETE_CUSTOMER)) {
 
             statement.setInt(1, customerId);
             statement.executeUpdate();
@@ -231,6 +236,7 @@ public class CustomerDaoImpl implements CustomerDao {
         customer.setPhone(resultSet.getString("phone"));
 
         java.sql.Date dob = resultSet.getDate("dob");
+
         if (dob != null) {
             customer.setDob(dob.toString());
         }

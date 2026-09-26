@@ -13,14 +13,12 @@ import com.loanmanagement.model.LoanApplication;
 import com.loanmanagement.model.LoanType;
 
 import com.loanmanagement.service.ApplicationService;
-import com.loanmanagement.service.CreditBureauService;
 
 public class ApplicationServiceImpl implements ApplicationService {
 
     private final LoanApplicationDao loanApplicationDao;
     private final CustomerDao customerDao;
     private final LoanTypeDao loanTypeDao;
-    private final CreditBureauService creditBureauService;
 
     public ApplicationServiceImpl() {
 
@@ -32,9 +30,6 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         this.loanTypeDao =
                 new LoanTypeDaoImpl();
-
-        this.creditBureauService =
-                new CreditBureauServiceImpl();
     }
 
     @Override
@@ -141,18 +136,6 @@ public class ApplicationServiceImpl implements ApplicationService {
                     "Loan purpose cannot be empty"
             );
         }
-
-        int creditScore =
-                creditBureauService.getCreditScore(
-                        application.getCustomerId()
-                );
-
-        System.out.println(
-                "Credit score for customer "
-                        + application.getCustomerId()
-                        + ": "
-                        + creditScore
-        );
 
         application.setStatus("PENDING");
 

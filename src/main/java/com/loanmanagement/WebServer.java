@@ -21,7 +21,8 @@ public class WebServer {
 
     private static final int PORT = 8080;
 
-    private static final AppController controller = new AppController();
+    private static final AppController controller =
+            new AppController();
 
     public static void main(String[] args) throws Exception {
 
@@ -34,9 +35,6 @@ public class WebServer {
 
         // Authentication
         server.createContext("/api/login", WebServer::login);
-
-        // Dashboard
-        server.createContext("/api/dashboard", WebServer::dashboard);
 
         // Users
         server.createContext("/api/users", WebServer::users);
@@ -61,11 +59,17 @@ public class WebServer {
     // HEALTH CHECK
     // ============================================================
 
-    private static void health(HttpExchange exchange) throws IOException {
+    private static void health(HttpExchange exchange)
+            throws IOException {
 
         if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
-            sendResponse(exchange, 405,
-                    "{\"error\":\"Method not allowed\"}");
+
+            sendResponse(
+                    exchange,
+                    405,
+                    "{\"error\":\"Method not allowed\"}"
+            );
+
             return;
         }
 
@@ -80,97 +84,98 @@ public class WebServer {
     // LOGIN
     // ============================================================
 
-    private static void login(HttpExchange exchange) throws IOException {
+    private static void login(HttpExchange exchange)
+            throws IOException {
 
         if (!exchange.getRequestMethod().equalsIgnoreCase("POST")) {
-            sendResponse(exchange, 405,
-                    "{\"error\":\"Method not allowed\"}");
+
+            sendResponse(
+                    exchange,
+                    405,
+                    "{\"error\":\"Method not allowed\"}"
+            );
+
             return;
         }
 
         try {
 
-            String body = readRequestBody(exchange);
-            Map<String, String> data = parseFormData(body);
+            String body =
+                    readRequestBody(exchange);
 
-            String username = data.get("username");
-            String password = data.get("password");
+            Map<String, String> data =
+                    parseFormData(body);
 
-            if (username == null || password == null) {
-                sendResponse(exchange, 400,
-                        "{\"error\":\"Username and password are required\"}");
+            String username =
+                    data.get("username");
+
+            String password =
+                    data.get("password");
+
+            if (username == null ||
+                    password == null) {
+
+                sendResponse(
+                        exchange,
+                        400,
+                        "{\"error\":\"Username and password are required\"}"
+                );
+
                 return;
             }
 
-            boolean success = controller.login(username, password);
+            boolean success =
+                    controller.login(
+                            username,
+                            password
+                    );
 
             if (!success) {
-                sendResponse(exchange, 401,
-                        "{\"error\":\"Invalid username or password\"}");
+
+                sendResponse(
+                        exchange,
+                        401,
+                        "{\"error\":\"Invalid username or password\"}"
+                );
+
                 return;
             }
 
-            User user = controller.getUserByUsername(username);
+            User user =
+                    controller.getUserByUsername(
+                            username
+                    );
 
             String response =
                     "{"
                             + "\"message\":\"Login successful\","
                             + "\"userId\":" + user.getUserId() + ","
-                            + "\"username\":\"" + escapeJson(user.getUsername()) + "\","
-                            + "\"role\":\"" + user.getRole() + "\","
-                            + "\"status\":\"" + user.getStatus() + "\""
+                            + "\"username\":\""
+                            + escapeJson(user.getUsername())
+                            + "\","
+                            + "\"role\":\""
+                            + user.getRole()
+                            + "\","
+                            + "\"status\":\""
+                            + user.getStatus()
+                            + "\""
                             + "}";
 
-            sendResponse(exchange, 200, response);
+            sendResponse(
+                    exchange,
+                    200,
+                    response
+            );
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            sendResponse(exchange, 500,
-                    "{\"error\":\"Login failed\"}");
-        }
-    }
-
-    // ============================================================
-    // DASHBOARD
-    // ============================================================
-
-    private static void dashboard(HttpExchange exchange) throws IOException {
-
-        if (!exchange.getRequestMethod().equalsIgnoreCase("GET")) {
-            sendResponse(exchange, 405,
-                    "{\"error\":\"Method not allowed\"}");
-            return;
-        }
-
-        try {
-
-            int totalCustomers = controller.getTotalCustomers();
-            int totalLoans = controller.getTotalLoans();
-
-            double totalLoanAmount =
-                    controller.getTotalLoanAmount();
-
-            double totalRepaymentAmount =
-                    controller.getTotalRepaymentAmount();
-
-            String response =
-                    "{"
-                            + "\"totalCustomers\":" + totalCustomers + ","
-                            + "\"totalLoans\":" + totalLoans + ","
-                            + "\"totalLoanAmount\":" + totalLoanAmount + ","
-                            + "\"totalRepaymentAmount\":" + totalRepaymentAmount
-                            + "}";
-
-            sendResponse(exchange, 200, response);
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-
-            sendResponse(exchange, 500,
-                    "{\"error\":\"Unable to load dashboard data\"}");
+            sendResponse(
+                    exchange,
+                    500,
+                    "{\"error\":\"Login failed\"}"
+            );
         }
     }
 
@@ -178,9 +183,11 @@ public class WebServer {
     // USERS
     // ============================================================
 
-    private static void users(HttpExchange exchange) throws IOException {
+    private static void users(HttpExchange exchange)
+            throws IOException {
 
-        String method = exchange.getRequestMethod();
+        String method =
+                exchange.getRequestMethod();
 
         try {
 
@@ -194,23 +201,30 @@ public class WebServer {
 
             } else {
 
-                sendResponse(exchange, 405,
-                        "{\"error\":\"Method not allowed\"}");
+                sendResponse(
+                        exchange,
+                        405,
+                        "{\"error\":\"Method not allowed\"}"
+                );
             }
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            sendResponse(exchange, 500,
-                    "{\"error\":\"User operation failed\"}");
+            sendResponse(
+                    exchange,
+                    500,
+                    "{\"error\":\"User operation failed\"}"
+            );
         }
     }
 
     private static void getUsers(HttpExchange exchange)
             throws SQLException, IOException {
 
-        StringBuilder json = new StringBuilder();
+        StringBuilder json =
+                new StringBuilder();
 
         json.append("[");
 
@@ -219,10 +233,14 @@ public class WebServer {
                         "FROM users ORDER BY user_id";
 
         try (
-                Connection connection = DBConnection.getConnection();
+                Connection connection =
+                        DBConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql);
-                ResultSet rs = statement.executeQuery()
+
+                ResultSet rs =
+                        statement.executeQuery()
         ) {
 
             boolean first = true;
@@ -241,7 +259,11 @@ public class WebServer {
                         .append(",")
 
                         .append("\"username\":\"")
-                        .append(escapeJson(rs.getString("username")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("username")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"role\":\"")
@@ -262,24 +284,47 @@ public class WebServer {
 
         json.append("]");
 
-        sendResponse(exchange, 200, json.toString());
+        sendResponse(
+                exchange,
+                200,
+                json.toString()
+        );
     }
 
     private static void addUser(HttpExchange exchange)
             throws IOException, SQLException {
 
-        String body = readRequestBody(exchange);
+        String body =
+                readRequestBody(exchange);
 
-        String username = extractJsonValue(body, "username");
-        String password = extractJsonValue(body, "password");
-        String role = extractJsonValue(body, "role");
+        String username =
+                extractJsonValue(
+                        body,
+                        "username"
+                );
+
+        String password =
+                extractJsonValue(
+                        body,
+                        "password"
+                );
+
+        String role =
+                extractJsonValue(
+                        body,
+                        "role"
+                );
 
         if (username == null ||
                 password == null ||
                 role == null) {
 
-            sendResponse(exchange, 400,
-                    "{\"error\":\"username, password and role are required\"}");
+            sendResponse(
+                    exchange,
+                    400,
+                    "{\"error\":\"username, password and role are required\"}"
+            );
+
             return;
         }
 
@@ -292,20 +337,36 @@ public class WebServer {
                         "VALUES (?, ?, ?, 'ACTIVE')";
 
         try (
-                Connection connection = DBConnection.getConnection();
+                Connection connection =
+                        DBConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, username);
-            statement.setString(2, hashedPassword);
-            statement.setString(3, role);
+            statement.setString(
+                    1,
+                    username
+            );
+
+            statement.setString(
+                    2,
+                    hashedPassword
+            );
+
+            statement.setString(
+                    3,
+                    role
+            );
 
             statement.executeUpdate();
         }
 
-        sendResponse(exchange, 201,
-                "{\"message\":\"User created successfully\"}");
+        sendResponse(
+                exchange,
+                201,
+                "{\"message\":\"User created successfully\"}"
+        );
     }
 
     // ============================================================
@@ -315,7 +376,8 @@ public class WebServer {
     private static void loanTypes(HttpExchange exchange)
             throws IOException {
 
-        String method = exchange.getRequestMethod();
+        String method =
+                exchange.getRequestMethod();
 
         try {
 
@@ -329,23 +391,30 @@ public class WebServer {
 
             } else {
 
-                sendResponse(exchange, 405,
-                        "{\"error\":\"Method not allowed\"}");
+                sendResponse(
+                        exchange,
+                        405,
+                        "{\"error\":\"Method not allowed\"}"
+                );
             }
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            sendResponse(exchange, 500,
-                    "{\"error\":\"Loan type operation failed\"}");
+            sendResponse(
+                    exchange,
+                    500,
+                    "{\"error\":\"Loan type operation failed\"}"
+            );
         }
     }
 
     private static void getLoanTypes(HttpExchange exchange)
             throws SQLException, IOException {
 
-        StringBuilder json = new StringBuilder();
+        StringBuilder json =
+                new StringBuilder();
 
         json.append("[");
 
@@ -356,10 +425,14 @@ public class WebServer {
                         "FROM loan_types ORDER BY loan_type_id";
 
         try (
-                Connection connection = DBConnection.getConnection();
+                Connection connection =
+                        DBConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql);
-                ResultSet rs = statement.executeQuery()
+
+                ResultSet rs =
+                        statement.executeQuery()
         ) {
 
             boolean first = true;
@@ -379,27 +452,43 @@ public class WebServer {
                         .append(",")
 
                         .append("\"name\":\"")
-                        .append(escapeJson(rs.getString("name")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("name")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"description\":\"")
-                        .append(escapeJson(rs.getString("description")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("description")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"interestRate\":")
-                        .append(rs.getBigDecimal("interest_rate"))
+                        .append(
+                                rs.getBigDecimal("interest_rate")
+                        )
                         .append(",")
 
                         .append("\"minAmount\":")
-                        .append(rs.getBigDecimal("min_amount"))
+                        .append(
+                                rs.getBigDecimal("min_amount")
+                        )
                         .append(",")
 
                         .append("\"maxAmount\":")
-                        .append(rs.getBigDecimal("max_amount"))
+                        .append(
+                                rs.getBigDecimal("max_amount")
+                        )
                         .append(",")
 
                         .append("\"maxTenureMonths\":")
-                        .append(rs.getInt("max_tenure_months"))
+                        .append(
+                                rs.getInt("max_tenure_months")
+                        )
                         .append(",")
 
                         .append("\"status\":\"")
@@ -412,31 +501,54 @@ public class WebServer {
 
         json.append("]");
 
-        sendResponse(exchange, 200, json.toString());
+        sendResponse(
+                exchange,
+                200,
+                json.toString()
+        );
     }
 
     private static void addLoanType(HttpExchange exchange)
             throws IOException, SQLException {
 
-        String body = readRequestBody(exchange);
+        String body =
+                readRequestBody(exchange);
 
         String name =
-                extractJsonValue(body, "name");
+                extractJsonValue(
+                        body,
+                        "name"
+                );
 
         String description =
-                extractJsonValue(body, "description");
+                extractJsonValue(
+                        body,
+                        "description"
+                );
 
         String interestRate =
-                extractJsonValue(body, "interestRate");
+                extractJsonValue(
+                        body,
+                        "interestRate"
+                );
 
         String minAmount =
-                extractJsonValue(body, "minAmount");
+                extractJsonValue(
+                        body,
+                        "minAmount"
+                );
 
         String maxAmount =
-                extractJsonValue(body, "maxAmount");
+                extractJsonValue(
+                        body,
+                        "maxAmount"
+                );
 
         String maxTenureMonths =
-                extractJsonValue(body, "maxTenureMonths");
+                extractJsonValue(
+                        body,
+                        "maxTenureMonths"
+                );
 
         if (name == null ||
                 interestRate == null ||
@@ -444,8 +556,11 @@ public class WebServer {
                 maxAmount == null ||
                 maxTenureMonths == null) {
 
-            sendResponse(exchange, 400,
-                    "{\"error\":\"Required loan type fields are missing\"}");
+            sendResponse(
+                    exchange,
+                    400,
+                    "{\"error\":\"Required loan type fields are missing\"}"
+            );
 
             return;
         }
@@ -457,35 +572,59 @@ public class WebServer {
                         "VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE')";
 
         try (
-                Connection connection = DBConnection.getConnection();
+                Connection connection =
+                        DBConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, name);
-            statement.setString(2, description);
+            statement.setString(
+                    1,
+                    name
+            );
+
+            statement.setString(
+                    2,
+                    description
+            );
+
             statement.setBigDecimal(
                     3,
-                    new java.math.BigDecimal(interestRate)
+                    new java.math.BigDecimal(
+                            interestRate
+                    )
             );
+
             statement.setBigDecimal(
                     4,
-                    new java.math.BigDecimal(minAmount)
+                    new java.math.BigDecimal(
+                            minAmount
+                    )
             );
+
             statement.setBigDecimal(
                     5,
-                    new java.math.BigDecimal(maxAmount)
+                    new java.math.BigDecimal(
+                            maxAmount
+                    )
             );
+
             statement.setInt(
                     6,
-                    Integer.parseInt(maxTenureMonths)
+                    Integer.parseInt(
+                            maxTenureMonths
+                    )
             );
 
             statement.executeUpdate();
         }
 
-        sendResponse(exchange, 201,
-                "{\"message\":\"Loan type created successfully\"}");
+        sendResponse(
+                exchange,
+                201,
+                "{\"message\":\"Loan type created successfully\"}"
+        );
     }
 
     // ============================================================
@@ -495,7 +634,8 @@ public class WebServer {
     private static void customers(HttpExchange exchange)
             throws IOException {
 
-        String method = exchange.getRequestMethod();
+        String method =
+                exchange.getRequestMethod();
 
         try {
 
@@ -509,23 +649,30 @@ public class WebServer {
 
             } else {
 
-                sendResponse(exchange, 405,
-                        "{\"error\":\"Method not allowed\"}");
+                sendResponse(
+                        exchange,
+                        405,
+                        "{\"error\":\"Method not allowed\"}"
+                );
             }
 
         } catch (Exception e) {
 
             e.printStackTrace();
 
-            sendResponse(exchange, 500,
-                    "{\"error\":\"Customer operation failed\"}");
+            sendResponse(
+                    exchange,
+                    500,
+                    "{\"error\":\"Customer operation failed\"}"
+            );
         }
     }
 
     private static void getCustomers(HttpExchange exchange)
             throws SQLException, IOException {
 
-        StringBuilder json = new StringBuilder();
+        StringBuilder json =
+                new StringBuilder();
 
         json.append("[");
 
@@ -538,10 +685,14 @@ public class WebServer {
                         "FROM customers ORDER BY customer_id";
 
         try (
-                Connection connection = DBConnection.getConnection();
+                Connection connection =
+                        DBConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql);
-                ResultSet rs = statement.executeQuery()
+
+                ResultSet rs =
+                        statement.executeQuery()
         ) {
 
             boolean first = true;
@@ -565,15 +716,27 @@ public class WebServer {
                         .append(",")
 
                         .append("\"fullName\":\"")
-                        .append(escapeJson(rs.getString("full_name")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("full_name")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"email\":\"")
-                        .append(escapeJson(rs.getString("email")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("email")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"phone\":\"")
-                        .append(escapeJson(rs.getString("phone")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("phone")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"dob\":\"")
@@ -581,35 +744,65 @@ public class WebServer {
                         .append("\",")
 
                         .append("\"address\":\"")
-                        .append(escapeJson(rs.getString("address")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("address")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"monthlyIncome\":")
-                        .append(rs.getBigDecimal("monthly_income"))
+                        .append(
+                                rs.getBigDecimal("monthly_income")
+                        )
                         .append(",")
 
                         .append("\"panNumber\":\"")
-                        .append(escapeJson(rs.getString("pan_number")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("pan_number")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"aadhaarLast4\":\"")
-                        .append(escapeJson(rs.getString("aadhaar_last4")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("aadhaar_last4")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"employmentType\":\"")
-                        .append(escapeJson(rs.getString("employment_type")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("employment_type")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"accountNumber\":\"")
-                        .append(escapeJson(rs.getString("account_number")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("account_number")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"ifscCode\":\"")
-                        .append(escapeJson(rs.getString("ifsc_code")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("ifsc_code")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"bankName\":\"")
-                        .append(escapeJson(rs.getString("bank_name")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("bank_name")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"kycStatus\":\"")
@@ -617,17 +810,25 @@ public class WebServer {
                         .append("\",")
 
                         .append("\"kycRemarks\":\"")
-                        .append(escapeJson(rs.getString("kyc_remarks")))
+                        .append(
+                                escapeJson(
+                                        rs.getString("kyc_remarks")
+                                )
+                        )
                         .append("\",")
 
                         .append("\"creditScore\":")
-                        .append(rs.getObject("credit_score") == null
-                                ? "null"
-                                : rs.getInt("credit_score"))
+                        .append(
+                                rs.getObject("credit_score") == null
+                                        ? "null"
+                                        : rs.getInt("credit_score")
+                        )
                         .append(",")
 
                         .append("\"existingEmi\":")
-                        .append(rs.getBigDecimal("existing_emi"))
+                        .append(
+                                rs.getBigDecimal("existing_emi")
+                        )
                         .append(",")
 
                         .append("\"status\":\"")
@@ -640,7 +841,11 @@ public class WebServer {
 
         json.append("]");
 
-        sendResponse(exchange, 200, json.toString());
+        sendResponse(
+                exchange,
+                200,
+                json.toString()
+        );
     }
 
     // ============================================================
@@ -650,15 +855,20 @@ public class WebServer {
     private static void updateKyc(HttpExchange exchange)
             throws IOException, SQLException {
 
-        String path = exchange.getRequestURI().getPath();
+        String path =
+                exchange.getRequestURI().getPath();
 
-        String prefix = "/api/customers/";
+        String prefix =
+                "/api/customers/";
 
         if (!path.startsWith(prefix) ||
                 !path.endsWith("/kyc")) {
 
-            sendResponse(exchange, 400,
-                    "{\"error\":\"Invalid KYC URL\"}");
+            sendResponse(
+                    exchange,
+                    400,
+                    "{\"error\":\"Invalid KYC URL\"}"
+            );
 
             return;
         }
@@ -674,28 +884,43 @@ public class WebServer {
         try {
 
             customerId =
-                    Integer.parseInt(customerIdText);
+                    Integer.parseInt(
+                            customerIdText
+                    );
 
         } catch (NumberFormatException e) {
 
-            sendResponse(exchange, 400,
-                    "{\"error\":\"Invalid customer ID\"}");
+            sendResponse(
+                    exchange,
+                    400,
+                    "{\"error\":\"Invalid customer ID\"}"
+            );
 
             return;
         }
 
-        String body = readRequestBody(exchange);
+        String body =
+                readRequestBody(exchange);
 
         String status =
-                extractJsonValue(body, "status");
+                extractJsonValue(
+                        body,
+                        "status"
+                );
 
         String remarks =
-                extractJsonValue(body, "remarks");
+                extractJsonValue(
+                        body,
+                        "remarks"
+                );
 
         if (status == null) {
 
-            sendResponse(exchange, 400,
-                    "{\"error\":\"KYC status is required\"}");
+            sendResponse(
+                    exchange,
+                    400,
+                    "{\"error\":\"KYC status is required\"}"
+            );
 
             return;
         }
@@ -703,17 +928,24 @@ public class WebServer {
         if (!status.equals("VERIFIED") &&
                 !status.equals("REJECTED")) {
 
-            sendResponse(exchange, 400,
-                    "{\"error\":\"KYC status must be VERIFIED or REJECTED\"}");
+            sendResponse(
+                    exchange,
+                    400,
+                    "{\"error\":\"KYC status must be VERIFIED or REJECTED\"}"
+            );
 
             return;
         }
 
         if (status.equals("REJECTED") &&
-                (remarks == null || remarks.isBlank())) {
+                (remarks == null ||
+                        remarks.isBlank())) {
 
-            sendResponse(exchange, 400,
-                    "{\"error\":\"Remarks are required when KYC is rejected\"}");
+            sendResponse(
+                    exchange,
+                    400,
+                    "{\"error\":\"Remarks are required when KYC is rejected\"}"
+            );
 
             return;
         }
@@ -727,34 +959,55 @@ public class WebServer {
                         "WHERE customer_id = ?";
 
         try (
-                Connection connection = DBConnection.getConnection();
+                Connection connection =
+                        DBConnection.getConnection();
+
                 PreparedStatement statement =
                         connection.prepareStatement(sql)
         ) {
 
-            statement.setString(1, status);
-            statement.setString(2, remarks);
+            statement.setString(
+                    1,
+                    status
+            );
+
+            statement.setString(
+                    2,
+                    remarks
+            );
 
             // Temporary officer ID.
             // Later this will come from authenticated session.
-            statement.setInt(3, 2);
+            statement.setInt(
+                    3,
+                    2
+            );
 
-            statement.setInt(4, customerId);
+            statement.setInt(
+                    4,
+                    customerId
+            );
 
             int rows =
                     statement.executeUpdate();
 
             if (rows == 0) {
 
-                sendResponse(exchange, 404,
-                        "{\"error\":\"Customer not found\"}");
+                sendResponse(
+                        exchange,
+                        404,
+                        "{\"error\":\"Customer not found\"}"
+                );
 
                 return;
             }
         }
 
-        sendResponse(exchange, 200,
-                "{\"message\":\"KYC status updated successfully\"}");
+        sendResponse(
+                exchange,
+                200,
+                "{\"message\":\"KYC status updated successfully\"}"
+        );
     }
 
     // ============================================================
@@ -762,7 +1015,8 @@ public class WebServer {
     // ============================================================
 
     private static String readRequestBody(
-            HttpExchange exchange) throws IOException {
+            HttpExchange exchange)
+            throws IOException {
 
         InputStream inputStream =
                 exchange.getRequestBody();
@@ -783,7 +1037,9 @@ public class WebServer {
         Map<String, String> data =
                 new HashMap<>();
 
-        if (body == null || body.isBlank()) {
+        if (body == null ||
+                body.isBlank()) {
+
             return data;
         }
 
@@ -809,7 +1065,10 @@ public class WebServer {
                                 StandardCharsets.UTF_8
                         );
 
-                data.put(key, value);
+                data.put(
+                        key,
+                        value
+                );
             }
         }
 
@@ -839,21 +1098,30 @@ public class WebServer {
         }
 
         int colonIndex =
-                json.indexOf(":", keyIndex);
+                json.indexOf(
+                        ":",
+                        keyIndex
+                );
 
         if (colonIndex == -1) {
             return null;
         }
 
         int firstQuote =
-                json.indexOf("\"", colonIndex);
+                json.indexOf(
+                        "\"",
+                        colonIndex
+                );
 
         if (firstQuote == -1) {
             return null;
         }
 
         int secondQuote =
-                json.indexOf("\"", firstQuote + 1);
+                json.indexOf(
+                        "\"",
+                        firstQuote + 1
+                );
 
         if (secondQuote == -1) {
             return null;
@@ -869,7 +1137,8 @@ public class WebServer {
     // JSON ESCAPING
     // ============================================================
 
-    private static String escapeJson(String value) {
+    private static String escapeJson(
+            String value) {
 
         if (value == null) {
             return "";
@@ -889,24 +1158,35 @@ public class WebServer {
     private static void sendResponse(
             HttpExchange exchange,
             int statusCode,
-            String response) throws IOException {
+            String response)
+            throws IOException {
 
         byte[] bytes =
-                response.getBytes(StandardCharsets.UTF_8);
+                response.getBytes(
+                        StandardCharsets.UTF_8
+                );
 
         exchange.getResponseHeaders()
-                .set("Content-Type", "application/json");
+                .set(
+                        "Content-Type",
+                        "application/json"
+                );
 
         exchange.getResponseHeaders()
-                .set("Access-Control-Allow-Origin", "*");
+                .set(
+                        "Access-Control-Allow-Origin",
+                        "*"
+                );
 
         exchange.sendResponseHeaders(
                 statusCode,
                 bytes.length
         );
 
-        try (OutputStream outputStream =
-                     exchange.getResponseBody()) {
+        try (
+                OutputStream outputStream =
+                        exchange.getResponseBody()
+        ) {
 
             outputStream.write(bytes);
         }
