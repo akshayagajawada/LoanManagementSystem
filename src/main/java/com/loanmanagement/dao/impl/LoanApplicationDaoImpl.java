@@ -48,7 +48,9 @@ public class LoanApplicationDaoImpl implements LoanApplicationDao {
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(SQL_INSERT_APPLICATION)) {
+                     connection.prepareStatement(
+                             SQL_INSERT_APPLICATION,
+                             Statement.RETURN_GENERATED_KEYS)) {
 
             statement.setInt(1, application.getCustomerId());
             statement.setInt(2, application.getLoanTypeId());
@@ -68,6 +70,17 @@ public class LoanApplicationDaoImpl implements LoanApplicationDao {
             // reviewed_at remains NULL for a new application
 
             statement.executeUpdate();
+
+            // Get the auto-generated application ID
+            try (ResultSet resultSet =
+                         statement.getGeneratedKeys()) {
+
+                if (resultSet.next()) {
+                    application.setApplicationId(
+                            resultSet.getInt(1)
+                    );
+                }
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException(

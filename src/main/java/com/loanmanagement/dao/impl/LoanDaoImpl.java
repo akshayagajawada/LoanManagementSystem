@@ -52,42 +52,110 @@ public class LoanDaoImpl implements LoanDao {
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(SQL_INSERT_LOAN)) {
+                     connection.prepareStatement(
+                             SQL_INSERT_LOAN,
+                             Statement.RETURN_GENERATED_KEYS)) {
 
-            statement.setInt(1, loan.getApplicationId());
-            statement.setInt(2, loan.getCustomerId());
-            statement.setInt(3, loan.getLoanTypeId());
-            statement.setDouble(4, loan.getPrincipalAmount());
-            statement.setDouble(5, loan.getInterestRate());
-            statement.setInt(6, loan.getTenureMonths());
-            statement.setDouble(7, loan.getTotalPayable());
-            statement.setDouble(8, loan.getOutstandingAmount());
+            statement.setInt(
+                    1,
+                    loan.getApplicationId()
+            );
+
+            statement.setInt(
+                    2,
+                    loan.getCustomerId()
+            );
+
+            statement.setInt(
+                    3,
+                    loan.getLoanTypeId()
+            );
+
+            statement.setDouble(
+                    4,
+                    loan.getPrincipalAmount()
+            );
+
+            statement.setDouble(
+                    5,
+                    loan.getInterestRate()
+            );
+
+            statement.setInt(
+                    6,
+                    loan.getTenureMonths()
+            );
+
+            statement.setDouble(
+                    7,
+                    loan.getTotalPayable()
+            );
+
+            statement.setDouble(
+                    8,
+                    loan.getOutstandingAmount()
+            );
 
             if (loan.getStartDate() == null ||
                     loan.getStartDate().isBlank()) {
+
                 statement.setDate(
                         9,
-                        new java.sql.Date(System.currentTimeMillis())
+                        new java.sql.Date(
+                                System.currentTimeMillis()
+                        )
                 );
+
             } else {
+
                 statement.setDate(
                         9,
-                        Date.valueOf(loan.getStartDate())
+                        Date.valueOf(
+                                loan.getStartDate()
+                        )
                 );
             }
 
-            statement.setString(10, loan.getStatus());
+            statement.setString(
+                    10,
+                    loan.getStatus()
+            );
 
             if (loan.getCreatedBy() == 0) {
-                statement.setNull(11, Types.INTEGER);
+
+                statement.setNull(
+                        11,
+                        Types.INTEGER
+                );
+
             } else {
-                statement.setInt(11, loan.getCreatedBy());
+
+                statement.setInt(
+                        11,
+                        loan.getCreatedBy()
+                );
             }
 
             statement.executeUpdate();
 
+            // Get the generated loan ID
+            try (ResultSet keys =
+                         statement.getGeneratedKeys()) {
+
+                if (keys.next()) {
+
+                    loan.setLoanId(
+                            keys.getInt(1)
+                    );
+                }
+            }
+
         } catch (SQLException e) {
-            throw new RuntimeException("Error adding loan", e);
+
+            throw new RuntimeException(
+                    "Error adding loan",
+                    e
+            );
         }
     }
 
@@ -96,19 +164,29 @@ public class LoanDaoImpl implements LoanDao {
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(SQL_SELECT_LOAN_BY_ID)) {
+                     connection.prepareStatement(
+                             SQL_SELECT_LOAN_BY_ID)) {
 
-            statement.setInt(1, loanId);
+            statement.setInt(
+                    1,
+                    loanId
+            );
 
-            try (ResultSet resultSet = statement.executeQuery()) {
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
 
                 if (resultSet.next()) {
+
                     return mapLoan(resultSet);
                 }
             }
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error fetching loan", e);
+
+            throw new RuntimeException(
+                    "Error fetching loan",
+                    e
+            );
         }
 
         return null;
@@ -119,41 +197,100 @@ public class LoanDaoImpl implements LoanDao {
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(SQL_UPDATE_LOAN)) {
+                     connection.prepareStatement(
+                             SQL_UPDATE_LOAN)) {
 
-            statement.setInt(1, loan.getApplicationId());
-            statement.setInt(2, loan.getCustomerId());
-            statement.setInt(3, loan.getLoanTypeId());
-            statement.setDouble(4, loan.getPrincipalAmount());
-            statement.setDouble(5, loan.getInterestRate());
-            statement.setInt(6, loan.getTenureMonths());
-            statement.setDouble(7, loan.getTotalPayable());
-            statement.setDouble(8, loan.getOutstandingAmount());
+            statement.setInt(
+                    1,
+                    loan.getApplicationId()
+            );
+
+            statement.setInt(
+                    2,
+                    loan.getCustomerId()
+            );
+
+            statement.setInt(
+                    3,
+                    loan.getLoanTypeId()
+            );
+
+            statement.setDouble(
+                    4,
+                    loan.getPrincipalAmount()
+            );
+
+            statement.setDouble(
+                    5,
+                    loan.getInterestRate()
+            );
+
+            statement.setInt(
+                    6,
+                    loan.getTenureMonths()
+            );
+
+            statement.setDouble(
+                    7,
+                    loan.getTotalPayable()
+            );
+
+            statement.setDouble(
+                    8,
+                    loan.getOutstandingAmount()
+            );
 
             if (loan.getStartDate() == null ||
                     loan.getStartDate().isBlank()) {
-                statement.setNull(9, Types.DATE);
+
+                statement.setNull(
+                        9,
+                        Types.DATE
+                );
+
             } else {
+
                 statement.setDate(
                         9,
-                        Date.valueOf(loan.getStartDate())
+                        Date.valueOf(
+                                loan.getStartDate()
+                        )
                 );
             }
 
-            statement.setString(10, loan.getStatus());
+            statement.setString(
+                    10,
+                    loan.getStatus()
+            );
 
             if (loan.getCreatedBy() == 0) {
-                statement.setNull(11, Types.INTEGER);
+
+                statement.setNull(
+                        11,
+                        Types.INTEGER
+                );
+
             } else {
-                statement.setInt(11, loan.getCreatedBy());
+
+                statement.setInt(
+                        11,
+                        loan.getCreatedBy()
+                );
             }
 
-            statement.setInt(12, loan.getLoanId());
+            statement.setInt(
+                    12,
+                    loan.getLoanId()
+            );
 
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error updating loan", e);
+
+            throw new RuntimeException(
+                    "Error updating loan",
+                    e
+            );
         }
     }
 
@@ -162,18 +299,27 @@ public class LoanDaoImpl implements LoanDao {
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement =
-                     connection.prepareStatement(SQL_DELETE_LOAN)) {
+                     connection.prepareStatement(
+                             SQL_DELETE_LOAN)) {
 
-            statement.setInt(1, loanId);
+            statement.setInt(
+                    1,
+                    loanId
+            );
 
             statement.executeUpdate();
 
         } catch (SQLException e) {
-            throw new RuntimeException("Error deleting loan", e);
+
+            throw new RuntimeException(
+                    "Error deleting loan",
+                    e
+            );
         }
     }
 
-    private Loan mapLoan(ResultSet resultSet) throws SQLException {
+    private Loan mapLoan(
+            ResultSet resultSet) throws SQLException {
 
         Loan loan = new Loan();
 
@@ -213,10 +359,14 @@ public class LoanDaoImpl implements LoanDao {
                 resultSet.getDouble("outstanding_amount")
         );
 
-        Date startDate = resultSet.getDate("start_date");
+        Date startDate =
+                resultSet.getDate("start_date");
 
         if (startDate != null) {
-            loan.setStartDate(startDate.toString());
+
+            loan.setStartDate(
+                    startDate.toString()
+            );
         }
 
         loan.setStatus(

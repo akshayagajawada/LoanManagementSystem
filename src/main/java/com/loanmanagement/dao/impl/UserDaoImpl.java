@@ -7,6 +7,7 @@ import com.loanmanagement.util.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,7 +48,10 @@ public class UserDaoImpl implements UserDao {
                         DBConnection.getConnection();
 
                 PreparedStatement statement =
-                        connection.prepareStatement(SQL_INSERT_USER)
+                        connection.prepareStatement(
+                                SQL_INSERT_USER,
+                                Statement.RETURN_GENERATED_KEYS
+                        )
         ) {
 
             statement.setString(
@@ -71,6 +75,18 @@ public class UserDaoImpl implements UserDao {
             );
 
             statement.executeUpdate();
+
+            // Get the generated user ID
+            try (ResultSet keys =
+                         statement.getGeneratedKeys()) {
+
+                if (keys.next()) {
+
+                    user.setUserId(
+                            keys.getInt(1)
+                    );
+                }
+            }
 
         } catch (Exception e) {
 
